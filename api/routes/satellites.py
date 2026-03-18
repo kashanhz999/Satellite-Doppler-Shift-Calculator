@@ -6,11 +6,12 @@ import logging
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.rate_limit import limiter
 from db.models import SatelliteORM
 from db.session import get_db
 from doppler_core.exceptions import CelestrakFetchError, SatelliteNotFoundError
@@ -160,7 +161,8 @@ async def add_satellites_by_tle(req: AddSatellitesByTLERequest, db: AsyncSession
 
 
 @router.post("/satellites/fetch", response_model=AddSatellitesResponse)
-async def fetch_satellites(req: AddSatellitesByNoradRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def fetch_satellites(request: Request, req: AddSatellitesByNoradRequest, db: AsyncSession = Depends(get_db)):
     """Fetch TLEs from Celestrak by NORAD IDs and add to registry."""
     fetcher = TLEFetcher()
     tles = await fetcher.fetch_and_store(req.norad_ids, db)
@@ -187,7 +189,8 @@ async def fetch_satellites(req: AddSatellitesByNoradRequest, db: AsyncSession = 
 
 
 @router.post("/satellites/fetch-group", response_model=AddSatellitesResponse)
-async def fetch_satellite_group(req: FetchGroupRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def fetch_satellite_group(request: Request, req: FetchGroupRequest, db: AsyncSession = Depends(get_db)):
     """Fetch all TLEs in a Celestrak group and add to registry."""
     fetcher = TLEFetcher()
     tles = await fetcher.fetch_group_and_store(req.group, db)

@@ -6,10 +6,11 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from api.auth import require_api_key
+from api.rate_limit import limiter
 from doppler_core.doppler import compute_doppler, compute_doppler_batch, compute_doppler_series
 from doppler_core.models import DopplerResult, GroundStation, PassInfo, TLEData
 from doppler_core.propagator import load_satellite, predict_passes
@@ -107,7 +108,8 @@ def _to_ground_station(req: GroundStationRequest) -> GroundStation:
 
 
 @router.post("/doppler/compute", response_model=ComputeResponse)
-async def doppler_compute(req: ComputeRequest):
+@limiter.limit("100/minute")
+async def doppler_compute(request: Request, req: ComputeRequest):
     """Compute Doppler shift for a single satellite at a given time (or now)."""
     gs = _to_ground_station(req.ground_station)
     t = _parse_time(req.time_utc)
@@ -116,7 +118,8 @@ async def doppler_compute(req: ComputeRequest):
 
 
 @router.post("/doppler/series", response_model=SeriesResponse)
-async def doppler_series(req: SeriesRequest):
+@limiter.limit("10/minute")
+async def doppler_series(request: Request, req: SeriesRequest):
     """Compute Doppler shift over a time interval."""
     gs = _to_ground_station(req.ground_station)
     start = _parse_time(req.start_utc)
@@ -139,7 +142,8 @@ async def doppler_series(req: SeriesRequest):
 
 
 @router.post("/doppler/batch", response_model=BatchResponse)
-async def doppler_batch(req: BatchRequest):
+@limiter.limit("10/minute")
+async def doppler_batch(request: Request, req: BatchRequest):
     """Compute Doppler shift for multiple satellites at a single time."""
     if len(req.tles) > 100:
         raise HTTPException(status_code=400, detail="Maximum 100 satellites per batch request")
@@ -151,7 +155,8 @@ async def doppler_batch(req: BatchRequest):
 
 
 @router.post("/passes/predict", response_model=PassesResponse)
-async def passes_predict(req: PredictPassesRequest):
+@limiter.limit("10/minute")
+async def passes_predict(request: Request, req: PredictPassesRequest):
     """Predict satellite passes over a ground station."""
     gs = _to_ground_station(req.ground_station)
     sat = load_satellite(req.tle)

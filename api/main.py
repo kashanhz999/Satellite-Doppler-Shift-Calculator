@@ -9,8 +9,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 
 from api.middleware import RequestIDMiddleware
+from api.rate_limit import limiter
 from config import get_settings
 from doppler_core.exceptions import (
     CelestrakFetchError,
@@ -90,6 +92,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.state.limiter = limiter
+
 # --- Middleware ---
 
 settings = get_settings()
@@ -106,6 +110,15 @@ app.add_middleware(RequestIDMiddleware)
 
 
 # --- Exception handlers ---
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"error": {"type": "rate_limit_exceeded", "message": "Too many requests", "detail": str(exc.detail)}},
+        headers={"Retry-After": str(exc.detail)},
+    )
 
 
 @app.exception_handler(TLEParseError)
