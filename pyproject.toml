@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "satellite-doppler-shift-tool"
+version = "0.2.0"
+description = "Real-time Satellite Doppler Shift Calculator using SGP4 orbital propagation"
+requires-python = ">=3.9"
+dependencies = [
+    "sgp4>=2.22",
+    "skyfield>=1.49",
+    "numpy>=1.26",
+    "pydantic>=2.5",
+    "pydantic-settings>=2.0",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "click>=8.1",
+    "rich>=13.7",
+    "python-json-logger>=3.0",
+    "sqlalchemy[asyncio]>=2.0",
+    "asyncpg>=0.29",
+    "alembic>=1.13",
+    "redis>=5.0",
+    "httpx>=0.27",
+    "slowapi>=0.1.9",
+    "websockets>=12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "fakeredis>=2.21",
+    "respx>=0.21",
+    "ruff>=0.8",
+    "aiosqlite>=0.20",
+]
+
+[project.scripts]
+doppler = "cli.main:cli"
+
+[tool.setuptools.packages.find]
+include = ["doppler_core*", "cli*", "api*", "db*", "services*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"

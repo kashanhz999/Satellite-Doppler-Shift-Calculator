@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m venv .venv)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(pip install:*)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python -m cli.main compute --tle-file tests/fixtures/iss.tle --freq 145.825e6 --lat 37.7749 --lon -122.4194)",
+      "Bash(python -m cli.main passes --tle-file tests/fixtures/iss.tle --lat 37.7749 --lon -122.4194 --days 1 --min-el 15)",
+      "Bash(grep -E \"\\\\.\\(py|toml|yml|yaml|md|txt|dockerfile|gitignore\\)$|Dockerfile\")"
+    ]
+  }
+}
