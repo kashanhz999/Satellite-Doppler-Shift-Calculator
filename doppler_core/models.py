@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -121,11 +120,7 @@ def parse_tle_file(content: str) -> list[TLEData]:
             tles.append(TLEData(name=f"SAT-{norad_id}", line1=lines[i], line2=lines[i + 1]))
             i += 2
         # Standard 3-line format: name, line1, line2
-        elif (
-            i + 2 < len(lines)
-            and lines[i + 1].startswith("1 ")
-            and lines[i + 2].startswith("2 ")
-        ):
+        elif i + 2 < len(lines) and lines[i + 1].startswith("1 ") and lines[i + 2].startswith("2 "):
             tles.append(TLEData(name=lines[i], line1=lines[i + 1], line2=lines[i + 2]))
             i += 3
         else:

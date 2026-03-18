@@ -35,7 +35,9 @@ async def require_api_key(
         )
 
     if api_key not in settings.api_keys:
-        logger.warning("Invalid API key attempt from %s", request.client.host if request.client else "unknown")
+        logger.warning(
+            "Invalid API key attempt from %s", request.client.host if request.client else "unknown"
+        )
         raise HTTPException(
             status_code=401,
             detail={"error": {"type": "authentication_error", "message": "Invalid API key"}},

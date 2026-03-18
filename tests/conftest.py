@@ -1,10 +1,6 @@
 """Shared test fixtures."""
 
-import asyncio
-from typing import AsyncGenerator
-
 import pytest
-import pytest_asyncio
 
 from doppler_core.models import GroundStation, TLEData
 

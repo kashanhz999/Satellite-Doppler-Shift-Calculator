@@ -1,8 +1,5 @@
 """Tests for Redis cache service."""
 
-from datetime import datetime, timezone
-
-from doppler_core.models import SatellitePosition
 from services.cache import _cache_key
 
 

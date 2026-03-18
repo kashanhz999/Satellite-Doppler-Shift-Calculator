@@ -1,6 +1,5 @@
 """Tests for WebSocket real-time streaming."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
@@ -18,12 +17,18 @@ def test_websocket_connect_and_receive():
     """Test WebSocket connection and receiving Doppler data."""
     with client.websocket_connect("/api/v1/ws/track") as ws:
         # Send tracking config
-        ws.send_json({
-            "tles": [ISS_TLE],
-            "frequency_hz": 145.825e6,
-            "ground_station": {"latitude_deg": 37.77, "longitude_deg": -122.42, "elevation_m": 0},
-            "interval_seconds": 0.1,
-        })
+        ws.send_json(
+            {
+                "tles": [ISS_TLE],
+                "frequency_hz": 145.825e6,
+                "ground_station": {
+                    "latitude_deg": 37.77,
+                    "longitude_deg": -122.42,
+                    "elevation_m": 0,
+                },
+                "interval_seconds": 0.1,
+            }
+        )
 
         # Should receive config acknowledgment
         msg = ws.receive_json()

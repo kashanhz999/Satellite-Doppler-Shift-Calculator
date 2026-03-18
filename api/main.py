@@ -116,7 +116,13 @@ app.add_middleware(RequestIDMiddleware)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse(
         status_code=429,
-        content={"error": {"type": "rate_limit_exceeded", "message": "Too many requests", "detail": str(exc.detail)}},
+        content={
+            "error": {
+                "type": "rate_limit_exceeded",
+                "message": "Too many requests",
+                "detail": str(exc.detail),
+            }
+        },
         headers={"Retry-After": str(exc.detail)},
     )
 
@@ -125,7 +131,9 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 async def tle_parse_error_handler(request: Request, exc: TLEParseError):
     return JSONResponse(
         status_code=400,
-        content={"error": {"type": "tle_parse_error", "message": exc.message, "detail": exc.detail}},
+        content={
+            "error": {"type": "tle_parse_error", "message": exc.message, "detail": exc.detail}
+        },
     )
 
 

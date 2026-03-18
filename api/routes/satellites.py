@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,8 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.rate_limit import limiter
 from db.models import SatelliteORM
 from db.session import get_db
-from doppler_core.exceptions import CelestrakFetchError, SatelliteNotFoundError
-from doppler_core.models import DopplerResult, GroundStation, TLEData
+from doppler_core.exceptions import SatelliteNotFoundError
+from doppler_core.models import GroundStation, TLEData
 from doppler_core.propagator import compute_position, load_satellite
 from services.tle_fetcher import TLEFetcher, _parse_tle_epoch
 
@@ -162,7 +162,9 @@ async def add_satellites_by_tle(req: AddSatellitesByTLERequest, db: AsyncSession
 
 @router.post("/satellites/fetch", response_model=AddSatellitesResponse)
 @limiter.limit("5/minute")
-async def fetch_satellites(request: Request, req: AddSatellitesByNoradRequest, db: AsyncSession = Depends(get_db)):
+async def fetch_satellites(
+    request: Request, req: AddSatellitesByNoradRequest, db: AsyncSession = Depends(get_db)
+):
     """Fetch TLEs from Celestrak by NORAD IDs and add to registry."""
     fetcher = TLEFetcher()
     tles = await fetcher.fetch_and_store(req.norad_ids, db)
@@ -190,7 +192,9 @@ async def fetch_satellites(request: Request, req: AddSatellitesByNoradRequest, d
 
 @router.post("/satellites/fetch-group", response_model=AddSatellitesResponse)
 @limiter.limit("5/minute")
-async def fetch_satellite_group(request: Request, req: FetchGroupRequest, db: AsyncSession = Depends(get_db)):
+async def fetch_satellite_group(
+    request: Request, req: FetchGroupRequest, db: AsyncSession = Depends(get_db)
+):
     """Fetch all TLEs in a Celestrak group and add to registry."""
     fetcher = TLEFetcher()
     tles = await fetcher.fetch_group_and_store(req.group, db)

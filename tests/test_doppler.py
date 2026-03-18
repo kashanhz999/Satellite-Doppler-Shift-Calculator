@@ -1,6 +1,6 @@
 """Tests for Doppler shift computation."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from doppler_core.doppler import SPEED_OF_LIGHT_KM_S, compute_doppler, compute_doppler_series
 

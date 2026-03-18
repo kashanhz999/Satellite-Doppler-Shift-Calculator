@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
-import numpy as np
 
 from doppler_core.models import DopplerResult, GroundStation, TLEData
 from doppler_core.propagator import compute_position, load_satellite

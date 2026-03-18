@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 import httpx
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import get_settings
@@ -80,9 +79,7 @@ class TLEFetcher:
         logger.info("Fetched %d TLE(s) from Celestrak", len(tles))
         return tles
 
-    async def fetch_and_store(
-        self, norad_ids: List[int], db: AsyncSession
-    ) -> List[TLEData]:
+    async def fetch_and_store(self, norad_ids: List[int], db: AsyncSession) -> List[TLEData]:
         """Fetch TLEs by NORAD IDs and upsert into database."""
         from db.models import SatelliteORM
 
@@ -117,9 +114,7 @@ class TLEFetcher:
         await db.commit()
         return results
 
-    async def fetch_group_and_store(
-        self, group: str, db: AsyncSession
-    ) -> List[TLEData]:
+    async def fetch_group_and_store(self, group: str, db: AsyncSession) -> List[TLEData]:
         """Fetch all TLEs in a group and upsert into database."""
         from db.models import SatelliteORM
 

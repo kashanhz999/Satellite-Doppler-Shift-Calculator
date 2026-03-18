@@ -14,7 +14,7 @@ from rich.console import Console
 from rich.live import Live
 from rich.table import Table
 
-from doppler_core.doppler import compute_doppler, compute_doppler_series
+from doppler_core.doppler import compute_doppler
 from doppler_core.models import GroundStation, TLEData, parse_tle_file
 from doppler_core.propagator import load_satellite, predict_passes
 
@@ -49,7 +49,7 @@ def _load_tles(tle: Optional[str], tle_file: Optional[str]) -> list[TLEData]:
         return tles
     elif tle:
         lines = tle.replace("\\n", "\n").strip().splitlines()
-        lines = [l.strip() for l in lines if l.strip()]
+        lines = [line.strip() for line in lines if line.strip()]
         if len(lines) == 2:
             return [TLEData(name=f"SAT-{lines[0][2:7].strip()}", line1=lines[0], line2=lines[1])]
         elif len(lines) >= 3:
@@ -102,7 +102,9 @@ def cli():
 @click.option("--lat", type=float, default=None, help="Ground station latitude (degrees)")
 @click.option("--lon", type=float, default=None, help="Ground station longitude (degrees)")
 @click.option("--alt", type=float, default=0.0, help="Ground station altitude (meters)")
-@click.option("--ground-station", "station_name", type=str, default=None, help="Named ground station")
+@click.option(
+    "--ground-station", "station_name", type=str, default=None, help="Named ground station"
+)
 def compute(tle, tle_file, freq, lat, lon, alt, station_name):
     """Compute Doppler shift for satellite(s) at current time."""
     tles = _load_tles(tle, tle_file)
@@ -130,8 +132,12 @@ def compute(tle, tle_file, freq, lat, lon, alt, station_name):
         )
 
     console.print()
-    console.print(f"[dim]Time: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}[/dim]")
-    console.print(f"[dim]Ground Station: {gs.name} ({gs.latitude_deg:.4f}N, {gs.longitude_deg:.4f}E, {gs.elevation_m:.0f}m)[/dim]")
+    console.print(
+        f"[dim]Time: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}[/dim]"
+    )
+    console.print(
+        f"[dim]Ground Station: {gs.name} ({gs.latitude_deg:.4f}N, {gs.longitude_deg:.4f}E, {gs.elevation_m:.0f}m)[/dim]"
+    )
     console.print(f"[dim]Tx Frequency: {freq:,.0f} Hz[/dim]")
     console.print(table)
 
@@ -146,7 +152,9 @@ def compute(tle, tle_file, freq, lat, lon, alt, station_name):
 @click.option("--lat", type=float, default=None, help="Ground station latitude (degrees)")
 @click.option("--lon", type=float, default=None, help="Ground station longitude (degrees)")
 @click.option("--alt", type=float, default=0.0, help="Ground station altitude (meters)")
-@click.option("--ground-station", "station_name", type=str, default=None, help="Named ground station")
+@click.option(
+    "--ground-station", "station_name", type=str, default=None, help="Named ground station"
+)
 @click.option("--interval", type=float, default=1.0, help="Update interval in seconds")
 def track(tle, tle_file, freq, lat, lon, alt, station_name, interval):
     """Live-track satellite Doppler shift (Ctrl+C to stop)."""
@@ -158,7 +166,9 @@ def track(tle, tle_file, freq, lat, lon, alt, station_name, interval):
     console.print("[dim]Press Ctrl+C to stop[/dim]\n")
 
     def make_table() -> Table:
-        table = Table(title=f"Live Tracking - {datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}")
+        table = Table(
+            title=f"Live Tracking - {datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}"
+        )
         table.add_column("Satellite", style="cyan")
         table.add_column("Az", justify="right")
         table.add_column("El", justify="right")
@@ -171,9 +181,7 @@ def track(tle, tle_file, freq, lat, lon, alt, station_name, interval):
         for t in tles:
             result = compute_doppler(t, gs, freq)
             status = (
-                "[green]VISIBLE[/green]"
-                if result.elevation_deg > 0
-                else "[dim]below horizon[/dim]"
+                "[green]VISIBLE[/green]" if result.elevation_deg > 0 else "[dim]below horizon[/dim]"
             )
             table.add_row(
                 result.satellite_name,
@@ -205,7 +213,9 @@ def track(tle, tle_file, freq, lat, lon, alt, station_name, interval):
 @click.option("--lat", type=float, default=None, help="Ground station latitude (degrees)")
 @click.option("--lon", type=float, default=None, help="Ground station longitude (degrees)")
 @click.option("--alt", type=float, default=0.0, help="Ground station altitude (meters)")
-@click.option("--ground-station", "station_name", type=str, default=None, help="Named ground station")
+@click.option(
+    "--ground-station", "station_name", type=str, default=None, help="Named ground station"
+)
 @click.option("--days", type=int, default=3, help="Number of days to predict")
 @click.option("--min-el", type=float, default=10.0, help="Minimum elevation in degrees")
 def passes(tle, tle_file, lat, lon, alt, station_name, days, min_el):
@@ -252,7 +262,9 @@ def passes(tle, tle_file, lat, lon, alt, station_name, days, min_el):
 
 @cli.command()
 @click.option("--norad-id", type=int, default=None, help="NORAD catalog number")
-@click.option("--group", type=str, default=None, help="Celestrak group (e.g., 'stations', 'active')")
+@click.option(
+    "--group", type=str, default=None, help="Celestrak group (e.g., 'stations', 'active')"
+)
 @click.option("--output", type=click.Path(), default=None, help="Save TLE to file")
 def fetch(norad_id, group, output):
     """Fetch live TLE data from Celestrak."""
@@ -342,7 +354,12 @@ def list_stations():
     table.add_column("Altitude (m)", justify="right")
 
     for name, s in stations.items():
-        table.add_row(name, f"{s['latitude_deg']:.4f}", f"{s['longitude_deg']:.4f}", f"{s.get('elevation_m', 0):.0f}")
+        table.add_row(
+            name,
+            f"{s['latitude_deg']:.4f}",
+            f"{s['longitude_deg']:.4f}",
+            f"{s.get('elevation_m', 0):.0f}",
+        )
 
     console.print(table)
 

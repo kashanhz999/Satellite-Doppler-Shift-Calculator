@@ -90,11 +90,13 @@ async def websocket_track(
                     logger.error("Doppler computation error: %s", e)
 
             if results:
-                await ws.send_json({
-                    "type": "doppler_update",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "results": results,
-                })
+                await ws.send_json(
+                    {
+                        "type": "doppler_update",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "results": results,
+                    }
+                )
 
             await asyncio.sleep(config.interval_seconds)
 

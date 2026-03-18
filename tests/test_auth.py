@@ -15,18 +15,21 @@ def _make_client(api_keys=None):
 
     # Clear cached settings
     from config import get_settings
+
     get_settings.cache_clear()
 
     with patch.dict(os.environ, env, clear=False):
         get_settings.cache_clear()
         # Re-import to pick up new settings
         from api.main import app
+
         return TestClient(app)
 
 
 @pytest.fixture(autouse=True)
 def _clear_settings():
     from config import get_settings
+
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -35,6 +38,7 @@ def _clear_settings():
 def test_health_always_accessible():
     """Health endpoint should work regardless of auth."""
     from api.main import app
+
     client = TestClient(app)
     response = client.get("/health")
     assert response.status_code == 200
@@ -43,6 +47,7 @@ def test_health_always_accessible():
 def test_no_auth_when_keys_empty():
     """When no API keys configured, endpoints should work without auth."""
     from api.main import app
+
     client = TestClient(app)
     response = client.post(
         "/api/v1/doppler/compute",

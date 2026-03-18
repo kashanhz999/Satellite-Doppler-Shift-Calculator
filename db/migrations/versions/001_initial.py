@@ -4,6 +4,7 @@ Revision ID: 001
 Revises:
 Create Date: 2026-03-18
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -24,12 +25,8 @@ def upgrade() -> None:
         sa.Column("tle_line2", sa.String(69), nullable=False),
         sa.Column("tle_epoch", sa.DateTime(timezone=True), nullable=False),
         sa.Column("reference_freq_hz", sa.Float(), nullable=True),
-        sa.Column(
-            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now()
-        ),
-        sa.Column(
-            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
 
     op.create_table(
@@ -39,9 +36,7 @@ def upgrade() -> None:
         sa.Column("latitude_deg", sa.Float(), nullable=False),
         sa.Column("longitude_deg", sa.Float(), nullable=False),
         sa.Column("elevation_m", sa.Float(), server_default="0.0"),
-        sa.Column(
-            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now()
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
 
     op.create_table(
@@ -68,9 +63,7 @@ def upgrade() -> None:
         ),
     )
 
-    op.create_index(
-        "ix_doppler_norad_time", "doppler_measurements", ["norad_id", "time_utc"]
-    )
+    op.create_index("ix_doppler_norad_time", "doppler_measurements", ["norad_id", "time_utc"])
 
 
 def downgrade() -> None:

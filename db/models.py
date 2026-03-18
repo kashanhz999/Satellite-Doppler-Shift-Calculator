@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, Float, ForeignKey, Index, Integer, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -21,9 +21,7 @@ class SatelliteORM(Base):
     tle_line2: Mapped[str] = mapped_column(String(69), nullable=False)
     tle_epoch: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     reference_freq_hz: Mapped[float | None] = mapped_column(Float, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -42,9 +40,7 @@ class GroundStationORM(Base):
     latitude_deg: Mapped[float] = mapped_column(Float, nullable=False)
     longitude_deg: Mapped[float] = mapped_column(Float, nullable=False)
     elevation_m: Mapped[float] = mapped_column(Float, default=0.0)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     measurements: Mapped[list[DopplerMeasurementORM]] = relationship(
         back_populates="ground_station"
@@ -56,9 +52,7 @@ class GroundStationORM(Base):
 
 class DopplerMeasurementORM(Base):
     __tablename__ = "doppler_measurements"
-    __table_args__ = (
-        Index("ix_doppler_norad_time", "norad_id", "time_utc"),
-    )
+    __table_args__ = (Index("ix_doppler_norad_time", "norad_id", "time_utc"),)
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     time_utc: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
